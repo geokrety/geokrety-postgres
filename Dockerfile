@@ -5,5 +5,6 @@ RUN apt-get update \
       postgresql-12-postgis-3 \
       postgresql-12-postgis-3-scripts \
       postgis \
+      postgresql-12-pgtap \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/*
