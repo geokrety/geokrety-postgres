@@ -1,7 +1,9 @@
 FROM postgres:12
 
+COPY pgdg.preferences /etc/apt/preferences.d/pgdg
+
 RUN apt-get update \
- && apt-get install -y \
+ && apt-get install -y --allow-downgrades \
       postgresql-12-postgis-3 \
       postgresql-12-postgis-3-scripts \
       postgis \
