@@ -1,16 +1,16 @@
-FROM postgres:12
+FROM postgres:14
 
 COPY pgdg.preferences /etc/apt/preferences.d/pgdg
 
 RUN apt-get update \
  && apt-get install -y --allow-downgrades \
-      postgresql-12-postgis-3 \
-      postgresql-12-postgis-3-scripts \
+      postgresql-14-postgis-3 \
+      postgresql-14-postgis-3-scripts \
       postgis \
-      postgresql-12-pgtap \
+      postgresql-14-pgtap \
       make \
       gcc \
-      postgresql-server-dev-12 \
+      postgresql-server-dev-14 \
       curl \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/* \
@@ -24,7 +24,7 @@ RUN apt-get update \
  && apt-get remove --purge -y \
       make \
       gcc \
-      postgresql-server-dev-12 \
+      postgresql-server-dev-14 \
       curl
 
 ## Would have been nice to use pgnx to install `quantile` extension but required
