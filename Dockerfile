@@ -14,13 +14,21 @@ RUN apt-get update \
       curl \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/* \
+ \
  && mkdir /tmp/pgxn \
+ \
  && cd /tmp/pgxn \
  && curl -L https://github.com/tvondra/quantile/archive/244b6285e2c6a8d73bc555d7103200985e371bfa.tar.gz|tar xzf - \
  && cd /tmp/pgxn/quantile-244b6285e2c6a8d73bc555d7103200985e371bfa \
  && make install \
- && cd .. \
- && rm -fr /tmp/pgxn/quantile-244b6285e2c6a8d73bc555d7103200985e371bfa \
+ \
+ && cd /tmp/pgxn \
+ && curl -L https://github.com/omniti-labs/pg_amqp/archive/240d477d40c5e7a579b931c98eb29cef4edda164.tar.gz|tar xzf - \
+ && cd /tmp/pgxn/pg_amqp-240d477d40c5e7a579b931c98eb29cef4edda164 \
+ && make install \
+ \
+ && cd / \
+ && rm -fr /tmp/pgxn \
  && apt-get remove --purge -y \
       make \
       gcc \
