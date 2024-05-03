@@ -1,4 +1,4 @@
-FROM postgres:14-bullseye
+FROM postgres:16-bullseye
 
 COPY pgdg.preferences /etc/apt/preferences.d/pgdg
 
