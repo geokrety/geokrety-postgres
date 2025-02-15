@@ -1,0 +1,36 @@
+--- a/src/librabbitmq/amqp.h
++++ b/src/librabbitmq/amqp.h
+@@ -1,6 +1,7 @@
+ #ifndef librabbitmq_amqp_h
+ #define librabbitmq_amqp_h
+
++#include <sys/time.h>
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+--- a/src/librabbitmq/amqp_socket.c
++++ b/src/librabbitmq/amqp_socket.c
+@@ -1,5 +1,6 @@
+ #include <stdlib.h>
+ #include <stdio.h>
++#include <sys/time.h>
+ #include <string.h>
+ #include <stdint.h>
+ #include <errno.h>
+--- a/src/pg_amqp.c
++++ b/src/pg_amqp.c
+@@ -96,6 +96,14 @@ static void amqp_local_phase2(XactEvent event, void *arg) {
+   amqp_rpc_reply_t *reply;
+   struct brokerstate *bs;
+   switch(event) {
++    case XACT_EVENT_PARALLEL_COMMIT:
++    case XACT_EVENT_PARALLEL_ABORT:
++    case XACT_EVENT_PRE_COMMIT:
++    case XACT_EVENT_PARALLEL_PRE_COMMIT:
++    case XACT_EVENT_PRE_PREPARE:
++      /* These events are not relevant for AMQP operations */
++      return;
++
+     case XACT_EVENT_COMMIT:
+       for(bs = HEAD_BS; bs; bs = bs->next) {
+         if(bs->inerror) local_amqp_disconnect_bs(bs);
