@@ -1,35 +1,59 @@
-FROM postgres:16-bullseye
+FROM timescale/timescaledb:2.26.0-pg16-oss
 
-COPY pgdg.preferences /etc/apt/preferences.d/pgdg
+COPY pg_amqp-compile-fix.patch /tmp/pgxn/pg_amqp-compile-fix.patch
 
-RUN apt-get update \
- && apt-get install -y --allow-downgrades \
-      postgresql-16-postgis-3 \
-      postgresql-16-postgis-3-scripts \
-      postgis \
-      postgresql-16-pgtap \
-      make \
-      gcc \
-      postgresql-server-dev-16 \
+RUN apk add --no-cache \
+      geos \
+      proj \
+      gdal \
+      libxml2 \
+      json-c \
+      protobuf-c \
+      postgresql-contrib \
+      postgresql-client \
       curl \
- && apt-get clean \
- && rm -r /var/lib/apt/lists/* \
+      tar \
+ && apk add --no-cache --virtual .build-deps \
+       build-base \
+       make \
+       perl \
+       gcc \
+       pkgconf \
+       bash \
+       ca-certificates \
+       patch \
+       clang \
+       llvm \
+       geos-dev \
+       proj-dev \
+       gdal-dev \
+       libxml2-dev \
+       json-c-dev \
+       protobuf-c-dev \
+ && mkdir -p /tmp/postgis \
+ && cd /tmp/postgis \
+ && curl -L https://download.osgeo.org/postgis/source/postgis-3.6.2.tar.gz | tar xzf - \
+ && cd /tmp/postgis/postgis-3.6.2 \
+ && ./configure --with-pgconfig=/usr/local/bin/pg_config \
+ && make -j$(nproc) \
+ && make install \
+ && cd / \
+ && rm -fr /tmp/postgis \
  \
- && mkdir /tmp/pgxn \
+ && mkdir -p /tmp/pgtap \
+ && curl -L https://github.com/theory/pgtap/archive/refs/tags/v1.3.4.tar.gz | tar xzf - -C /tmp/pgtap \
+ && cd /tmp/pgtap/pgtap-1.3.4 \
+ && make PG_CONFIG=/usr/local/bin/pg_config \
+ && make install PG_CONFIG=/usr/local/bin/pg_config \
+ && cd / \
+ && rm -fr /tmp/pgtap \
  \
  && cd /tmp/pgxn \
- && curl -L https://github.com/omniti-labs/pg_amqp/archive/240d477d40c5e7a579b931c98eb29cef4edda164.tar.gz|tar xzf - \
- && cd /tmp/pgxn/pg_amqp-240d477d40c5e7a579b931c98eb29cef4edda164 \
+ && curl -L https://github.com/kumy/pg_amqp/archive/refs/heads/patch-1.tar.gz | tar xzf - \
+ && ln -sf /usr/bin/clang /usr/bin/clang-19 || true \
+ && cd /tmp/pgxn/pg_amqp-patch-1 \
+ && patch -p1 < /tmp/pgxn/pg_amqp-compile-fix.patch \
  && make install \
- \
  && cd / \
  && rm -fr /tmp/pgxn \
- && apt-get remove --purge -y \
-      make \
-      gcc \
-      postgresql-server-dev-16 \
-      curl
-
-## Would have been nice to use pgnx to install `quantile` extension but required
-# version is not currently available in pgxn
-# See: https://github.com/tvondra/quantile/issues/12
+ && apk del .build-deps
