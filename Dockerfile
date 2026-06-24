@@ -1,4 +1,4 @@
-FROM timescale/timescaledb:2.26.0-pg16-oss
+FROM timescale/timescaledb:2.28.1-pg16-oss
 
 COPY pg_amqp-compile-fix.patch /tmp/pgxn/pg_amqp-compile-fix.patch
 
